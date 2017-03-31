@@ -1,15 +1,26 @@
 package gopan
 
 import (
-	"path"
-	"runtime"
-	"strings"
-	"strconv"
-	"regexp"
-	"time"
-	"math/rand"
 	"encoding/json"
 	"io/ioutil"
+	"math/rand"
+	"path"
+	"regexp"
+	"runtime"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const (
+	UNKNOWN          = "Unknown"
+	AMERICAN_EXPRESS = "AMERICAN EXPRESS"
+	CHINA_UNION_PAY  = "CHINA UNION PAY"
+	DINERS_CLUB      = "DINERS CLUB"
+	DISCOVER         = "DISCOVER"
+	JCB              = "JCB"
+	MASTERCARD       = "MASTERCARD"
+	VISA             = "VISA"
 )
 
 type Config struct {
@@ -46,7 +57,7 @@ func IsValid(pan string) bool {
 		sum += mod
 	}
 
-	return sum % 10 == 0
+	return sum%10 == 0
 }
 
 func GetBrand(pan string) string {
@@ -60,7 +71,7 @@ func GetBrand(pan string) string {
 			}
 		}
 	}
-	return "Unknown"
+	return UNKNOWN
 }
 
 func GetHiddenPan(pan string, hiddenChar ...string) string {
@@ -70,7 +81,7 @@ func GetHiddenPan(pan string, hiddenChar ...string) string {
 		hc = hiddenChar[0]
 	}
 	l := len(pan)
-	h := []string{pan[:6], strings.Repeat(hc, l - 10), pan[l - 4:]}
+	h := []string{pan[:6], strings.Repeat(hc, l-10), pan[l-4:]}
 	return strings.Join(h, "")
 }
 
@@ -78,24 +89,22 @@ func Generate(brand ...string) string {
 	rand.Seed(time.Now().UnixNano())
 
 	config := getConfig()
-	var bpx ConfigBrandPrefix
+	bpx := config.BrandPrefix[rand.Intn(len(config.BrandPrefix)-1)]
 
-	flg := false
 	if len(brand) > 0 {
 		for _, brandPrefix := range config.BrandPrefix {
 			if brandPrefix.Name == brand[0] {
 				bpx = brandPrefix
-				flg = true
 				break
 			}
 		}
 	}
 
-	if flg == false {
-		bpx = config.BrandPrefix[rand.Intn(len(config.BrandPrefix) - 1)]
+	pfx := bpx.Prefixes[0]
+	pl := len(bpx.Prefixes)
+	if pl > 1 {
+		pfx = bpx.Prefixes[rand.Intn(pl-1)]
 	}
-
-	pfx := bpx.Prefixes[rand.Intn(len(bpx.Prefixes) - 1)]
 	fl := bpx.Length - len(pfx) - 1
 
 	pansl := []string{pfx}
@@ -107,7 +116,7 @@ func Generate(brand ...string) string {
 
 	sum := 0
 	for k, _ := range pan {
-		sub, _ := strconv.Atoi(string(pan[(len(pan) - 1) - k]))
+		sub, _ := strconv.Atoi(string(pan[(len(pan)-1)-k]))
 		w := sub * (2 - (k % 2))
 		if w < 10 {
 			sum += w
@@ -115,7 +124,7 @@ func Generate(brand ...string) string {
 			sum += w - 9
 		}
 	}
-	last := (10 - sum % 10) % 10
+	last := (10 - sum%10) % 10
 
 	return pan + strconv.Itoa(last)
 }
@@ -128,7 +137,7 @@ func getConfig() Config {
 	}
 	var config Config
 	json.Unmarshal(file, &config)
-	return config;
+	return config
 }
 
 func clean(pan string) string {

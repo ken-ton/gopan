@@ -8,8 +8,9 @@ import (
 func main() {
 	//pan := "4111-1111-1111-1111"
 	//pan := "3566 0020 2036 0505"
-	//pan := Generate()
-	pan := gopan.Generate("AMERICAN EXPRESS")
+	//pan := gopan.Generate(gopan.AMERICAN_EXPRESS)
+	//pan := gopan.Generate("JCB")
+	pan := gopan.Generate()
 
 	hidden := gopan.GetHiddenPan(pan)
 	valid := gopan.IsValid(pan)
