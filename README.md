@@ -1,5 +1,7 @@
 # gopan
 
+[![Build Status](https://travis-ci.org/ken-ton/gopan.svg?branch=master)](https://travis-ci.org/ken-ton/gopan)
+
 ## GoPAN
 
 Validate and Generate PAN (PrimaryAccountNumber a.k.a CreditCardNumber).
